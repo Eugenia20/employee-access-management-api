@@ -6,13 +6,16 @@ from app.main import app
 from app.db.session import Base
 from app.api.v1.deps import get_db
 from fastapi.testclient import TestClient
+import os
 
 # TEST DATABASE(only for testing)
-TEST_DATABASE_URL = "postgresql+psycopg2://postgres:Ibimina_08@localhost:5432/employee_test"
+SQLALCHEMY_DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql://postgres:postgres@localhost:5432/employee_test"
+)
 
-engine = create_engine(TEST_DATABASE_URL)
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
 
 #Override dependency
 def override_get_db():
@@ -25,13 +28,12 @@ def override_get_db():
 
 app.dependency_overrides[get_db] = override_get_db
 
-
 @pytest.fixture(scope="function")
 def client():
-    # 🧹 Create tables fresh for each test
+    # Create tables fresh for each test
     Base.metadata.create_all(bind=engine)
 
     yield TestClient(app)
 
-    # 🧹 Clean DB after test
+    # Clean DB after test
     Base.metadata.drop_all(bind=engine)
