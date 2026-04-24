@@ -23,8 +23,6 @@ def register_user(db: Session, full_name: str, email: str, password: str, role: 
         password_hash=hash_password(password),
         role=role,
     )
-    print("PASSWORD:", password)
-    print("BYTES LENGTH:", len(password.encode("utf-8")))
 
     db.add(user)
     db.commit()
